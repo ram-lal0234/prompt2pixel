@@ -123,16 +123,12 @@ export function ThumbnailPreview({ config, isOpen, onClose }: ThumbnailPreviewPr
                     )}
                     
                     {/* Sample elements */}
-                    <div className="mt-4 flex gap-2">
-                      <div
-                        className="w-8 h-8 rounded-full"
-                        style={{ backgroundColor: config.secondaryColor }}
-                      />
-                      <div
-                        className="w-8 h-8 rounded-full"
-                        style={{ backgroundColor: config.accentColor }}
-                      />
-                    </div>
+                                               <div className="mt-4 flex gap-2">
+                             <div
+                               className="w-8 h-8 rounded-full"
+                               style={{ backgroundColor: config.secondaryColor }}
+                             />
+                           </div>
                   </div>
                 </div>
                 
@@ -167,15 +163,40 @@ export function ThumbnailPreview({ config, isOpen, onClose }: ThumbnailPreviewPr
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Configuration</h3>
               
-              {/* Video Title */}
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Video Title</h4>
-                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                  {config.videoTitle || (
-                    <span className="text-gray-400 italic">No title entered</span>
-                  )}
-                </div>
-              </div>
+                                   {/* Video Title */}
+                     <div>
+                       <h4 className="font-medium text-gray-900 dark:text-white mb-2">Video Title</h4>
+                       <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                         {config.videoTitle || (
+                           <span className="text-gray-400 italic">No title entered</span>
+                         )}
+                       </div>
+                     </div>
+
+                     {/* Default Image */}
+                     {config.defaultImage && (
+                       <div>
+                         <h4 className="font-medium text-gray-900 dark:text-white mb-2">Default Image</h4>
+                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                           {config.defaultImagePreview ? (
+                             <div className="space-y-2">
+                               <img
+                                 src={config.defaultImagePreview}
+                                 alt="Default image"
+                                 className="w-full h-20 object-cover rounded border border-gray-300 dark:border-gray-600"
+                               />
+                               <div className="text-xs text-gray-600 dark:text-gray-400">
+                                 {config.defaultImage}
+                               </div>
+                             </div>
+                           ) : (
+                             <div className="text-xs text-gray-600 dark:text-gray-400">
+                               {config.defaultImage}
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                     )}
 
               {/* Niche */}
               <div>
@@ -203,36 +224,28 @@ export function ThumbnailPreview({ config, isOpen, onClose }: ThumbnailPreviewPr
                 </div>
               </div>
 
-              {/* Brand Colors */}
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Brand Colors</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="text-center">
-                    <div
-                      className="w-12 h-12 rounded-lg mx-auto mb-2 border border-gray-300 dark:border-gray-600"
-                      style={{ backgroundColor: config.primaryColor }}
-                    />
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Primary</div>
-                    <div className="text-xs font-mono text-gray-500">{config.primaryColor}</div>
-                  </div>
-                  <div className="text-center">
-                    <div
-                      className="w-12 h-12 rounded-lg mx-auto mb-2 border border-gray-300 dark:border-gray-600"
-                      style={{ backgroundColor: config.secondaryColor }}
-                    />
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Secondary</div>
-                    <div className="text-xs font-mono text-gray-500">{config.secondaryColor}</div>
-                  </div>
-                  <div className="text-center">
-                    <div
-                      className="w-12 h-12 rounded-lg mx-auto mb-2 border border-gray-300 dark:border-gray-600"
-                      style={{ backgroundColor: config.accentColor }}
-                    />
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Accent</div>
-                    <div className="text-xs font-mono text-gray-500">{config.accentColor}</div>
-                  </div>
-                </div>
-              </div>
+                                   {/* Brand Colors */}
+                     <div>
+                       <h4 className="font-medium text-gray-900 dark:text-white mb-2">Brand Colors</h4>
+                       <div className="grid grid-cols-2 gap-3">
+                         <div className="text-center">
+                           <div
+                             className="w-12 h-12 rounded-lg mx-auto mb-2 border border-gray-300 dark:border-gray-600"
+                             style={{ backgroundColor: config.primaryColor }}
+                           />
+                           <div className="text-xs text-gray-600 dark:text-gray-400">Primary</div>
+                           <div className="text-xs font-mono text-gray-500">{config.primaryColor}</div>
+                         </div>
+                         <div className="text-center">
+                           <div
+                             className="w-12 h-12 rounded-lg mx-auto mb-2 border border-gray-300 dark:border-gray-600"
+                             style={{ backgroundColor: config.secondaryColor }}
+                           />
+                           <div className="text-xs text-gray-600 dark:text-gray-400">Secondary</div>
+                           <div className="text-xs font-mono text-gray-500">{config.secondaryColor}</div>
+                         </div>
+                       </div>
+                     </div>
 
               {/* Thumbnail Size */}
               <div>

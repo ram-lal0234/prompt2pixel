@@ -68,8 +68,9 @@ export async function POST(request: NextRequest) {
         videoTitle: '',
         primaryColor: '#DC2626',
         secondaryColor: '#2563EB',
-        accentColor: '#000000',
-        niche: 'gaming',
+        defaultImage: '',
+        defaultImagePreview: '',
+        niche: 'education',
         size: '16:9',
       },
       imageData,
@@ -111,6 +112,21 @@ export async function POST(request: NextRequest) {
       };
 
       console.log("Generating thumbnail with image data");
+      response = await genAI.models.generateContent({
+        model: "gemini-2.5-flash-image-preview",
+        contents: [finalPrompt, imagePart],
+      });
+    } else if (config.defaultImagePreview) {
+      // Use default image from config
+      const defaultImageData = config.defaultImagePreview.split(',')[1]; // Remove data URL prefix
+      const imagePart = {
+        inlineData: {
+          mimeType: "image/png",
+          data: defaultImageData,
+        },
+      };
+
+      console.log("Generating thumbnail with default image from config");
       response = await genAI.models.generateContent({
         model: "gemini-2.5-flash-image-preview",
         contents: [finalPrompt, imagePart],
@@ -176,7 +192,8 @@ function createThumbnailPrompt({
     videoTitle: string;
     primaryColor: string;
     secondaryColor: string;
-    accentColor: string;
+    defaultImage: string;
+    defaultImagePreview?: string;
     niche: string;
     size: string;
   };
@@ -208,7 +225,6 @@ function createThumbnailPrompt({
         Brand Colors:
         - Primary: ${config.primaryColor}
         - Secondary: ${config.secondaryColor}
-        - Accent: ${config.accentColor}
 
         Requirements: 
         - ${sizeFormat} format
@@ -218,6 +234,7 @@ function createThumbnailPrompt({
         - Modern, eye-catching composition
         - Suitable for ${config.niche} content
         - Incorporate brand colors naturally into the design
+        ${config.defaultImagePreview ? '- Use the provided reference image as inspiration or base' : ''}
 
     Make it visually striking and optimized for the specified platform and size.`;
 }
