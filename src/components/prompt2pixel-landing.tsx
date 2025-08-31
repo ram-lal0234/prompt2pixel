@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, useMotionTemplate, useMotionValue, animate } from "framer-motion";
-import { ChevronRight, Zap, Palette, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronRight, Zap, Palette, Sparkles, ArrowRight, Video, TrendingUp, Target, Play, Users, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SparklesCore } from "./sparkles-core";
 import { GlowCard } from "./glow-card";
@@ -38,21 +38,39 @@ const Prompt2PixelLanding = () => {
 
   const examples = [
     {
-      title: "AI Art Generation",
-      description: "Transform text prompts into stunning digital artwork",
-      icon: Palette,
+      title: "YouTube Thumbnails",
+      description: "Create eye-catching thumbnails that boost click-through rates and drive more views to your videos",
+      icon: Video,
       color: "red"
     },
     {
-      title: "Logo Design",
-      description: "Create professional logos from simple descriptions",
-      icon: Zap,
+      title: "Educational Content",
+      description: "Design professional thumbnails for tutorials, courses, and educational videos with clear branding",
+      icon: Target,
       color: "red"
     },
     {
-      title: "Photo Enhancement",
-      description: "Enhance and stylize your photos with AI magic",
-      icon: Sparkles,
+      title: "Gaming & Entertainment",
+      description: "Generate dynamic thumbnails for gaming content, reviews, and entertainment videos",
+      icon: Play,
+      color: "red"
+    },
+    {
+      title: "Business & Marketing",
+      description: "Create compelling thumbnails for business presentations, product launches, and marketing campaigns",
+      icon: TrendingUp,
+      color: "red"
+    },
+    {
+      title: "Lifestyle & Vlogs",
+      description: "Design authentic thumbnails that reflect your personal brand and connect with your audience",
+      icon: Users,
+      color: "red"
+    },
+    {
+      title: "Product Reviews",
+      description: "Generate attention-grabbing thumbnails for product reviews, unboxings, and comparisons",
+      icon: Star,
       color: "red"
     }
   ];
@@ -142,7 +160,7 @@ const Prompt2PixelLanding = () => {
         >
           <span className="inline-flex items-center px-4 py-2 rounded-full bg-red-500/10 dark:bg-red-500/10 border border-red-500/20 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium">
             <Sparkles className="w-4 h-4 mr-2" />
-            AI-Powered Creative Studio
+            AI-Powered Thumbnail Generator
             <ChevronRight className="w-4 h-4 ml-2" />
           </span>
         </motion.div>
@@ -170,7 +188,7 @@ const Prompt2PixelLanding = () => {
           transition={{ duration: 0.8, delay: 0.7 }}
           className="text-xl md:text-2xl text-gray-600 dark:text-white/80 mb-8 max-w-3xl leading-relaxed"
         >
-          The most powerful AI image generation platform. Turn your imagination into stunning visuals with just a few words.
+          The most powerful AI thumbnail generation platform. Create eye-catching thumbnails that boost your click-through rates and drive more views.
         </motion.p>
 
         <motion.div
@@ -228,11 +246,11 @@ const Prompt2PixelLanding = () => {
               Endless Possibilities
             </h2>
             <p className="text-xl text-gray-600 dark:text-white/70 max-w-2xl mx-auto">
-              From concept art to professional designs, see what's possible with Prompt2Pixel
+              From YouTube thumbnails to social media graphics, see what's possible with AI-powered thumbnail generation
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {examples.map((example, index) => (
               <motion.div
                 key={index}
@@ -248,13 +266,27 @@ const Prompt2PixelLanding = () => {
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{example.title}</h3>
                     <p className="text-gray-600 dark:text-white/70 flex-1">{example.description}</p>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 font-medium hover:bg-red-500/30 transition-all"
-                    >
-                      Try Now
-                    </motion.button>
+                    <SignedIn>
+                      <motion.button
+                        onClick={handleGetStarted}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 font-medium hover:bg-red-500/30 transition-all"
+                      >
+                        Try Now
+                      </motion.button>
+                    </SignedIn>
+                    <SignedOut>
+                      <SignInButton mode="modal">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 font-medium hover:bg-red-500/30 transition-all"
+                        >
+                          Try Now
+                        </motion.button>
+                      </SignInButton>
+                    </SignedOut>
                   </div>
                 </GlowCard>
               </motion.div>
@@ -274,16 +306,16 @@ const Prompt2PixelLanding = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-red-400 mb-2">1M+</div>
-              <div className="text-gray-600 dark:text-white/70">Images Generated</div>
+              <div className="text-4xl md:text-5xl font-bold text-red-400 mb-2">100K+</div>
+              <div className="text-gray-600 dark:text-white/70">Thumbnails Generated</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-orange-400 mb-2">50K+</div>
-              <div className="text-gray-600 dark:text-white/70">Happy Creators</div>
+              <div className="text-4xl md:text-5xl font-bold text-orange-400 mb-2">10K+</div>
+              <div className="text-gray-600 dark:text-white/70">Content Creators</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">99.9%</div>
-              <div className="text-gray-600 dark:text-white/70">Uptime</div>
+              <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">95%</div>
+              <div className="text-gray-600 dark:text-white/70">Click Rate Boost</div>
             </div>
           </div>
         </motion.div>
@@ -302,7 +334,7 @@ const Prompt2PixelLanding = () => {
             Ready to Create Magic?
           </h2>
           <p className="text-xl text-gray-600 dark:text-white/70 mb-8 max-w-2xl mx-auto">
-            Join thousands of creators who are already transforming their ideas into stunning visuals.
+            Join thousands of content creators who are already boosting their views with AI-generated thumbnails.
           </p>
           <SignedIn>
             <motion.button

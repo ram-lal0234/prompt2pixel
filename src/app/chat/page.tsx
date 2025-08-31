@@ -6,7 +6,7 @@ import { ChatInterface } from '@/components/chat/chat-interface';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Lock, Loader2 } from 'lucide-react';
-import { ChatHeader } from '@/components/chat-header';
+
 
 interface Chat {
   id: string;
@@ -41,9 +41,9 @@ const mockChats: Chat[] = [
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20 flex items-center justify-center">
       <div className="text-center">
-        <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+        <Loader2 className="w-12 h-12 text-red-500 animate-spin mx-auto mb-4" />
         <p className="text-gray-600 dark:text-gray-300">Loading chat interface...</p>
       </div>
     </div>
@@ -94,12 +94,9 @@ function ChatPageContent() {
   };
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <ChatHeader />
-      
+    <div className="h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20">
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex h-full">
         {/* Mobile Overlay */}
         {showSidenav && (
           <div 
@@ -156,9 +153,9 @@ function ChatPageContent() {
 
 function AuthRequiredMessage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20 flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-6">
-        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
           <Lock className="w-10 h-10 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -170,7 +167,7 @@ function AuthRequiredMessage() {
         <SignInButton mode="modal">
           <Button 
             size="lg" 
-            className="text-lg px-8 py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="text-lg px-8 py-6 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             Sign In to Continue
             <ArrowRight className="ml-3 w-5 h-5" />

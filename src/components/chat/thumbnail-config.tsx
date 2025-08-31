@@ -180,7 +180,7 @@ export function ThumbnailConfig({
   );
 
   return (
-    <div className="h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2 items-center justify-center">
+    <div className="h-full bg-transparent">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <Palette className="w-5 h-5 text-red-500" />

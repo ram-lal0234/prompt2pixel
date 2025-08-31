@@ -18,7 +18,7 @@ import {
   PromptInputSubmit,
 } from "@/components/prompt-input";
 import { cn } from "@/lib/utils";
-import { Paperclip, Send, Bot, Loader2, X, Download, Eye } from "lucide-react";
+import { Paperclip, Send, Bot, Loader2, X, Download, Eye, Palette } from "lucide-react";
 import { staticRes } from "@/lib/ai/static-res";
 import { ImageViewModal } from "@/components/image-view-modal";
 import { ThumbnailConfig, ThumbnailConfig as ThumbnailConfigType } from "./thumbnail-config";
@@ -310,9 +310,9 @@ export function ChatInterface({
   };
 
   return (
-    <div className={cn("flex h-full", className)}>
-              {/* Main Chat Area - Center */}
-        <div className="flex-1 flex flex-col lg:mr-80">
+    <div className={cn("flex h-full relative", className)}>
+      {/* Main Chat Area - Center */}
+      <div className="flex-1 flex flex-col lg:mr-80">
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-4">
@@ -320,13 +320,13 @@ export function ChatInterface({
               <ConversationContent className="pb-24">
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                    <Bot className="w-16 h-16 text-blue-500 mb-4" />
+                    <Bot className="w-16 h-16 text-red-500 mb-4" />
                     <h3 className="text-xl font-semibold mb-2">
                       Welcome to Prompt2Pixel
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 max-w-md mb-4">
-                      I'm your specialized assistant for AI image generation.
-                      Transform your ideas into stunning images with prompt-based
+                      I'm your specialized assistant for AI thumbnail generation.
+                      Transform your ideas into stunning thumbnails with prompt-based
                       generation technology.
                     </p>
                   </div>
@@ -374,9 +374,9 @@ export function ChatInterface({
 
                         {/* Display generated thumbnail */}
                         {message.thumbnailData && (
-                          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                            <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
-                              🎨 Generated Image
+                          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                              🎨 Generated Thumbnail
                             </h4>
                             <div className="flex flex-wrap gap-4">
                               <div className="relative group">
@@ -433,6 +433,27 @@ export function ChatInterface({
           accept="image/*"
           className="hidden"
         />
+
+        {/* Mobile Thumbnail Config Toggle */}
+        <div className="lg:hidden p-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+            className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-all"
+          >
+            <Palette className="w-4 h-4" />
+            {isPreviewOpen ? 'Hide Settings' : 'Show Settings'}
+          </button>
+        </div>
+
+        {/* Mobile Thumbnail Config */}
+        {isPreviewOpen && (
+          <div className="lg:hidden p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <ThumbnailConfig
+              config={thumbnailConfig}
+              onConfigChange={handleConfigChange}
+            />
+          </div>
+        )}
 
         {/* Fixed Input Area */}
         <div className="sticky bottom-0 p-4">
@@ -498,7 +519,7 @@ export function ChatInterface({
 
                 <PromptInputSubmit
                   disabled={!input.trim() || isLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white transition-all"
                 >
                   <Send className="w-4 h-4" />
                 </PromptInputSubmit>
@@ -509,8 +530,8 @@ export function ChatInterface({
       </div>
 
       {/* Right Sidebar - Thumbnail Configuration */}
-      <div className="hidden lg:block w-80 border-l border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm fixed right-0 top-0 h-full overflow-y-auto">
-        <div className="p-4">
+      <div className="hidden lg:block w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 fixed right-0 top-0 h-full overflow-y-auto z-10">
+        <div className="p-6">
           <ThumbnailConfig
             config={thumbnailConfig}
             onConfigChange={handleConfigChange}

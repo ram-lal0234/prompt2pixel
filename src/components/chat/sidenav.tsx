@@ -75,7 +75,7 @@ export function Sidenav({
       <div className="p-4">
         <Button
           onClick={onNewChat}
-          className="w-full justify-start gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full justify-start gap-2 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white transition-all"
         >
           <Plus className="w-4 h-4" />
           New Chat
@@ -122,7 +122,7 @@ export function Sidenav({
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user?.imageUrl} alt={user?.firstName || "User"} />
-            <AvatarFallback className="bg-blue-100 text-blue-600">
+            <AvatarFallback className="bg-red-100 text-red-600">
               <User className="w-4 h-4" />
             </AvatarFallback>
           </Avatar>
@@ -162,7 +162,7 @@ function ChatItem({
       className={cn(
         "group relative flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
         isActive
-          ? "bg-blue-100 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100"
+                        ? "bg-red-100 dark:bg-red-900/20 text-red-900 dark:text-red-100"
           : "hover:bg-gray-100 dark:hover:bg-gray-800"
       )}
       onClick={onSelect}
