@@ -55,19 +55,19 @@ export function Sidenav({
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800",
+        "sticky top-0 h-screen flex flex-col bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800",
         className
       )}
     >
       {/* Navigation Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-center">
           <img src="/Prompt2Pixel_logo.png" alt="Thumb AI" className="w-full h-16" />
         </div>
       </div>
 
       {/* New Chat Button */}
-      <div className="p-4">
+      <div className="flex-shrink-0 p-4">
         <Button
           onClick={onNewChat}
           className="w-full justify-start gap-2 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white transition-all"
@@ -78,7 +78,7 @@ export function Sidenav({
       </div>
 
       {/* Search */}
-      <div className="px-4 pb-4">
+      <div className="flex-shrink-0 px-4 pb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
@@ -91,7 +91,7 @@ export function Sidenav({
       </div>
 
       {/* Chat List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {filteredChats.length === 0 ? (
           <div className="p-4 text-center text-gray-500 dark:text-gray-400">
             {searchQuery ? "No chats found" : "No chats yet"}
@@ -113,7 +113,7 @@ export function Sidenav({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user?.imageUrl} alt={user?.firstName || "User"} />
@@ -157,7 +157,7 @@ function ChatItem({
       className={cn(
         "group relative flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
         isActive
-                        ? "bg-red-100 dark:bg-red-900/20 text-red-900 dark:text-red-100"
+          ? "bg-red-100 dark:bg-red-900/20 text-red-900 dark:text-red-100"
           : "hover:bg-gray-100 dark:hover:bg-gray-800"
       )}
       onClick={onSelect}

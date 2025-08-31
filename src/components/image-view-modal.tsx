@@ -1,82 +1,202 @@
-"use client";
+'use client';
 
-import { X, Download } from "lucide-react";
-import { useEffect } from "react";
+import { X, Download, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ImageViewModalProps {
+  imageData: string;
   isOpen: boolean;
   onClose: () => void;
-  imageData: string;
-  alt?: string;
-  onDownload?: (imageData: string) => void;
+  fileName?: string;
 }
 
-export function ImageViewModal({ isOpen, onClose, imageData, alt = "Image", onDownload }: ImageViewModalProps) {
-  // Close modal on escape key
+export function ImageViewModal({ imageData, isOpen, onClose, fileName = 'image' }: ImageViewModalProps) {
+  const [scale, setScale] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const resetView = useCallback(() => {
+    setScale(1);
+    setRotation(0);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  const zoomIn = useCallback(() => {
+    setScale(prev => Math.min(prev * 1.2, 5));
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setScale(prev => Math.max(prev / 1.2, 0.1));
+  }, []);
+
+  const rotate = useCallback(() => {
+    setRotation(prev => (prev + 90) % 360);
+  }, []);
+
+  const downloadImage = useCallback(() => {
+    const link = document.createElement('a');
+    link.href = `data:image/png;base64,${imageData}`;
+    link.download = `${fileName}-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [imageData, fileName]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (scale > 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      });
+    }
+  }, [scale, position]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isDragging && scale > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  }, [isDragging, scale, dragStart]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      zoomIn();
+    } else {
+      zoomOut();
+    }
+  }, [zoomIn, zoomOut]);
+
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
+    if (isOpen) {
+      resetView();
+    }
+  }, [isOpen, resetView]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      switch (e.key) {
+        case 'Escape':
+          onClose();
+          break;
+        case '+':
+        case '=':
+          e.preventDefault();
+          zoomIn();
+          break;
+        case '-':
+          e.preventDefault();
+          zoomOut();
+          break;
+        case 'r':
+          e.preventDefault();
+          rotate();
+          break;
+        case '0':
+          e.preventDefault();
+          resetView();
+          break;
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, onClose]);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, zoomIn, zoomOut, rotate, resetView]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
+      {/* Close button */}
+      <button
         onClick={onClose}
-      />
-      
-      {/* Modal Content */}
-      <div className="relative z-10 max-w-[90vw] max-h-[90vh] bg-white dark:bg-gray-900 rounded-lg shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            View Image
-          </h3>
-          <div className="flex items-center gap-2">
-            {onDownload && (
-              <button
-                onClick={() => onDownload(imageData)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                title="Download image"
-              >
-                <Download className="w-5 h-5" />
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              title="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        className="absolute top-4 right-4 z-10 p-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full backdrop-blur-sm transition-colors"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      {/* Controls */}
+      <div className="absolute top-4 left-4 z-10 flex gap-2">
+        <button
+          onClick={zoomIn}
+          className="p-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full backdrop-blur-sm transition-colors"
+          title="Zoom In (+)"
+        >
+          <ZoomIn className="w-5 h-5" />
+        </button>
+        <button
+          onClick={zoomOut}
+          className="p-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full backdrop-blur-sm transition-colors"
+          title="Zoom Out (-)"
+        >
+          <ZoomOut className="w-5 h-5" />
+        </button>
+        <button
+          onClick={rotate}
+          className="p-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full backdrop-blur-sm transition-colors"
+          title="Rotate (R)"
+        >
+          <RotateCcw className="w-5 h-5" />
+        </button>
+        <button
+          onClick={resetView}
+          className="p-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full backdrop-blur-sm transition-colors"
+          title="Reset View (0)"
+        >
+          <RotateCcw className="w-5 h-5" />
+        </button>
+        <button
+          onClick={downloadImage}
+          className="p-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full backdrop-blur-sm transition-colors"
+          title="Download"
+        >
+          <Download className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Image container */}
+      <div
+        className="relative w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
+      >
+        <div
+          className="relative transition-transform duration-200 ease-out"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
+          }}
+        >
+          <img
+            src={`data:image/png;base64,${imageData}`}
+            alt="Full size image"
+            className="max-w-none max-h-none select-none"
+            draggable={false}
+          />
         </div>
-        
-        {/* Image Container */}
-        <div className="p-4">
-          <div className="flex items-center justify-center">
-            <img
-              src={`data:image/png;base64,${imageData}`}
-              alt={alt}
-              className="max-w-full max-h-[70vh] object-contain rounded-lg"
-            />
+      </div>
+
+      {/* Info overlay */}
+      <div className="absolute bottom-4 left-4 z-10 bg-gray-800/80 text-white px-4 py-2 rounded-lg backdrop-blur-sm">
+        <div className="text-sm">
+          <div>Scale: {Math.round(scale * 100)}%</div>
+          <div>Rotation: {rotation}°</div>
+          <div className="text-xs text-gray-300 mt-1">
+            Use mouse wheel to zoom, drag to pan, or keyboard shortcuts
           </div>
         </div>
       </div>

@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sidenav } from '@/components/chat/sidenav';
-import { ChatInterface } from '@/components/chat/chat-interface';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Lock, Loader2 } from 'lucide-react';
 import { useChat } from '@/hooks/use-chat';
 import { ClientOnly } from '@/components/client-only';
-
+import { EnhancedLayout } from '@/components/layout/enhanced-layout';
+import { useThumbnailChat } from '@/hooks/use-thumbnail-chat';
+import { ThumbnailConfig } from '@/components/chat/thumbnail-config';
 
 function LoadingSpinner() {
   return (
@@ -28,12 +28,24 @@ function ChatPageContent() {
     isLoading,
     error,
     createChat,
-    loadChat,
+    loadChat: loadChatFromList,
     deleteChat,
     toggleChatStar
   } = useChat();
 
-  const [showSidenav, setShowSidenav] = useState(false);
+  const { messages, isGenerating, error: chatError, currentChatId, generateThumbnail, sendMessage, loadChat, clearChat } = useThumbnailChat();
+  
+  const [showSidenav, setShowSidenav] = useState(true);
+  const [thumbnailConfig, setThumbnailConfig] = useState<ThumbnailConfig>({
+    videoTitle: '',
+    description: '',
+    primaryColor: '#DC2626',
+    secondaryColor: '#2563EB',
+    defaultImage: '',
+    defaultImagePreview: '',
+    niche: 'education',
+    size: '16:9',
+  });
 
   const handleChatSelect = async (chatId: string) => {
     await loadChat(chatId);
@@ -46,8 +58,19 @@ function ChatPageContent() {
   const handleNewChat = async () => {
     const newChat = await createChat('New Chat');
     if (newChat) {
-      await loadChat(newChat.id);
+      await loadChatFromList(newChat.id);
     }
+    clearChat();
+    setThumbnailConfig({
+      videoTitle: '',
+      description: '',
+      primaryColor: '#DC2626',
+      secondaryColor: '#2563EB',
+      defaultImage: '',
+      defaultImagePreview: '',
+      niche: 'education',
+      size: '16:9',
+    });
     // Close sidenav on mobile after creating a new chat
     if (window.innerWidth < 1024) {
       setShowSidenav(false);
@@ -62,60 +85,64 @@ function ChatPageContent() {
     await toggleChatStar(chatId, isStarred);
   };
 
+  const handleGenerateThumbnail = async () => {
+    try {
+      const chatId = await generateThumbnail(thumbnailConfig, currentChatId || undefined);
+      
+      // Update the chat list to reflect the new chat
+      if (!currentChatId) {
+        // This is a new chat, refresh the chat list
+        // The useChat hook should handle this automatically
+      }
+    } catch (error) {
+      console.error('Failed to generate thumbnail:', error);
+    }
+  };
+
+  const handleConfigChange = (newConfig: ThumbnailConfig) => {
+    setThumbnailConfig(newConfig);
+  };
+
+  const handleToggleSidenav = () => {
+    setShowSidenav(!showSidenav);
+  };
+
   return (
-    <div className="h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20">
-      {/* Main Content */}
-      <div className="flex h-full">
-        {/* Mobile Overlay */}
-        {showSidenav && (
-          <div 
-            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setShowSidenav(false)}
-          />
-        )}
-
-        {/* Sidenav */}
-        <div className={`
-          fixed lg:relative lg:block
-          ${showSidenav ? 'block' : 'hidden lg:block'}
-          lg:w-80 w-80
-          h-full
-          z-50 lg:z-auto
-          transition-all duration-300 ease-in-out
-        `}>
-          <Sidenav
-            chats={chats}
-            activeChatId={currentChat?.id || undefined}
-            onChatSelect={handleChatSelect}
-            onNewChat={handleNewChat}
-            onDeleteChat={handleDeleteChat}
-            onStarChat={handleStarChat}
-          />
-        </div>
-
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Mobile Toggle Button */}
-          <div className="lg:hidden p-2 border-b border-gray-200 dark:border-gray-800">
-            <button
-              onClick={() => setShowSidenav(!showSidenav)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Chat Interface */}
-          <div className="flex-1 min-h-0">
-            <ChatInterface
-              chatId={currentChat?.id || undefined}
-              onNewChat={handleNewChat}
-            />
-          </div>
-        </div>
-      </div>
+    <div className="h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20">
+      <EnhancedLayout
+        // Sidenav props
+        chats={chats}
+        activeChatId={currentChat?.id || undefined}
+        onChatSelect={handleChatSelect}
+        onNewChat={handleNewChat}
+        onDeleteChat={handleDeleteChat}
+        onStarChat={handleStarChat}
+        // Chat props
+        messages={messages}
+        onSendMessage={(message, attachedFiles) => {
+          // Handle attached files if needed
+          sendMessage(message);
+        }}
+        isLoading={isGenerating}
+        // Config props
+        thumbnailConfig={thumbnailConfig}
+        onConfigChange={handleConfigChange}
+        onGenerate={handleGenerateThumbnail}
+        isGenerating={isGenerating}
+        // History props
+        history={[]} // TODO: Implement history from Supabase
+        onHistoryItemSelect={(item) => {
+          // TODO: Load item config and regenerate
+          console.log('History item selected:', item);
+        }}
+        onHistoryItemDelete={(itemId) => {
+          // TODO: Delete from Supabase
+          console.log('History item deleted:', itemId);
+        }}
+        // Layout state
+        showSidenav={showSidenav}
+        onToggleSidenav={handleToggleSidenav}
+      />
     </div>
   );
 }

@@ -51,7 +51,23 @@ This will create:
 - ✅ Row Level Security (RLS) policies
 - ✅ Triggers for timestamps
 
-## 🔐 **Step 5: Configure Authentication**
+## 🗂️ **Step 5: Create Storage Bucket**
+
+After the database schema is created, you can create the storage bucket:
+
+1. **Option A: Use the Storage Service (Recommended)**
+   - The storage bucket will be created automatically when you first use the chat interface
+   - The `StorageService` will handle bucket creation with proper configuration
+
+2. **Option B: Manual Creation**
+   - Go to **Storage** in your Supabase dashboard
+   - Click **"New bucket"**
+   - Name: `thumbnails`
+   - Public: `false` (for security)
+   - File size limit: `10MB`
+   - Allowed MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
+
+## 🔐 **Step 6: Configure Authentication**
 
 1. Go to **Authentication** → **Settings**
 2. Under **Site URL**, add your development URL: `http://localhost:3000`
@@ -60,7 +76,7 @@ This will create:
    - `http://localhost:3000/`
 4. Save changes
 
-## 🎯 **Step 6: Test the Integration**
+## 🎯 **Step 7: Test the Integration**
 
 1. Start your development server:
    ```bash
@@ -73,7 +89,7 @@ This will create:
 5. Send a message
 6. Check Supabase dashboard to see data being stored
 
-## 📊 **Step 7: Monitor Data**
+## 📊 **Step 8: Monitor Data**
 
 In your Supabase dashboard, you can monitor:
 
