@@ -1,43 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidenav } from '@/components/chat/sidenav';
 import { ChatInterface } from '@/components/chat/chat-interface';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { useChat } from '@/hooks/use-chat';
+import { ClientOnly } from '@/components/client-only';
 
-
-interface Chat {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: string;
-  isStarred?: boolean;
-}
-
-// Mock data for demonstration
-const mockChats: Chat[] = [
-  {
-    id: '1',
-    title: 'YouTube Thumbnail Ideas',
-    lastMessage: 'What are some trending thumbnail styles for tech videos?',
-    timestamp: '2 hours ago',
-    isStarred: true
-  },
-  {
-    id: '2',
-    title: 'AI Image Generation Tips',
-    lastMessage: 'How can I improve my AI-generated thumbnails?',
-    timestamp: '1 day ago'
-  },
-  {
-    id: '3',
-    title: 'Content Strategy Discussion',
-    lastMessage: 'What\'s the best posting schedule for YouTube?',
-    timestamp: '3 days ago'
-  }
-];
 
 function LoadingSpinner() {
   return (
@@ -51,46 +22,44 @@ function LoadingSpinner() {
 }
 
 function ChatPageContent() {
-  const [chats, setChats] = useState<Chat[]>(mockChats);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const {
+    chats,
+    currentChat,
+    isLoading,
+    error,
+    createChat,
+    loadChat,
+    deleteChat,
+    toggleChatStar
+  } = useChat();
+
   const [showSidenav, setShowSidenav] = useState(false);
 
-  const handleChatSelect = (chatId: string) => {
-    setActiveChatId(chatId);
+  const handleChatSelect = async (chatId: string) => {
+    await loadChat(chatId);
     // Close sidenav on mobile after selecting a chat
     if (window.innerWidth < 1024) {
       setShowSidenav(false);
     }
   };
 
-  const handleNewChat = () => {
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: 'New Chat',
-      lastMessage: 'Start a new conversation...',
-      timestamp: 'Just now'
-    };
-    setChats(prev => [newChat, ...prev]);
-    setActiveChatId(newChat.id);
+  const handleNewChat = async () => {
+    const newChat = await createChat('New Chat');
+    if (newChat) {
+      await loadChat(newChat.id);
+    }
     // Close sidenav on mobile after creating a new chat
     if (window.innerWidth < 1024) {
       setShowSidenav(false);
     }
   };
 
-  const handleDeleteChat = (chatId: string) => {
-    setChats(prev => prev.filter(chat => chat.id !== chatId));
-    if (activeChatId === chatId) {
-      setActiveChatId(null);
-    }
+  const handleDeleteChat = async (chatId: string) => {
+    await deleteChat(chatId);
   };
 
-  const handleStarChat = (chatId: string) => {
-    setChats(prev => prev.map(chat => 
-      chat.id === chatId 
-        ? { ...chat, isStarred: !chat.isStarred }
-        : chat
-    ));
+  const handleStarChat = async (chatId: string, isStarred: boolean) => {
+    await toggleChatStar(chatId, isStarred);
   };
 
   return (
@@ -116,7 +85,7 @@ function ChatPageContent() {
         `}>
           <Sidenav
             chats={chats}
-            activeChatId={activeChatId || undefined}
+            activeChatId={currentChat?.id || undefined}
             onChatSelect={handleChatSelect}
             onNewChat={handleNewChat}
             onDeleteChat={handleDeleteChat}
@@ -141,7 +110,7 @@ function ChatPageContent() {
           {/* Chat Interface */}
           <div className="flex-1 min-h-0">
             <ChatInterface
-              chatId={activeChatId || undefined}
+              chatId={currentChat?.id || undefined}
               onNewChat={handleNewChat}
             />
           </div>
@@ -184,7 +153,9 @@ export default function ChatPage() {
   return (
     <>
       <SignedIn>
-        <ChatPageContent />
+        <ClientOnly fallback={<LoadingSpinner />}>
+          <ChatPageContent />
+        </ClientOnly>
       </SignedIn>
       <SignedOut>
         <AuthRequiredMessage />

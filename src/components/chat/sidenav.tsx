@@ -20,13 +20,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 
-interface Chat {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: string;
-  isStarred?: boolean;
-}
+import type { Database } from '@/lib/supabase'
+
+type Chat = Database['public']['Tables']['chats']['Row']
 
 interface SidenavProps {
   className?: string;
@@ -35,7 +31,7 @@ interface SidenavProps {
   onChatSelect?: (chatId: string) => void;
   onNewChat?: () => void;
   onDeleteChat?: (chatId: string) => void;
-  onStarChat?: (chatId: string) => void;
+  onStarChat?: (chatId: string, isStarred: boolean) => void;
 }
 
 export function Sidenav({
@@ -53,8 +49,7 @@ export function Sidenav({
 
   const filteredChats = chats.filter(
     (chat) =>
-      chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      chat.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -110,7 +105,7 @@ export function Sidenav({
                 isActive={chat.id === activeChatId}
                 onSelect={() => onChatSelect?.(chat.id)}
                 onDelete={() => onDeleteChat?.(chat.id)}
-                onStar={() => onStarChat?.(chat.id)}
+                onStar={() => onStarChat?.(chat.id, !chat.is_starred)}
               />
             ))}
           </div>
@@ -174,7 +169,7 @@ function ChatItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-sm truncate">{chat.title}</h3>
-          {chat.isStarred && (
+          {chat.is_starred && (
             <Star className="w-3 h-3 text-yellow-500 fill-current" />
           )}
         </div>
@@ -195,7 +190,7 @@ function ChatItem({
             <Star
               className={cn(
                 "w-3 h-3",
-                chat.isStarred
+                chat.is_starred
                   ? "text-yellow-500 fill-current"
                   : "text-gray-400"
               )}
