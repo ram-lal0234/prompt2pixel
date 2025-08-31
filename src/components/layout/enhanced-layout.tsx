@@ -5,6 +5,7 @@ import { Sidenav } from "@/components/chat/sidenav";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { ThumbnailConfig } from "@/components/chat/thumbnail-config";
 import { HistoryPanel } from "@/components/chat/history-panel";
+import { MemoryPanel } from "@/components/chat/memory-panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { 
@@ -15,7 +16,8 @@ import {
   Menu,
   X,
   History,
-  Palette
+  Palette,
+  Brain
 } from "lucide-react";
 
 interface Message {
@@ -24,6 +26,8 @@ interface Message {
   content: string;
   timestamp: Date;
   thumbnailData?: string;
+  referenceImageData?: string;
+  configData?: any; // Config data used for thumbnail generation
 }
 
 interface AttachedFile {
@@ -54,9 +58,10 @@ interface EnhancedLayoutProps {
   onNewChat?: () => void;
   onDeleteChat?: (chatId: string) => void;
   onStarChat?: (chatId: string, isStarred: boolean) => void;
+  isSidenavLoading?: boolean;
   // Chat props
   messages?: Message[];
-  onSendMessage?: (message: string, attachedFiles?: AttachedFile[]) => void;
+  onSendMessage: (message: string, attachedFiles?: AttachedFile[]) => void;
   isLoading?: boolean;
   // Config props
   thumbnailConfig?: ThumbnailConfigType;
@@ -67,12 +72,16 @@ interface EnhancedLayoutProps {
   history?: any[];
   onHistoryItemSelect?: (item: any) => void;
   onHistoryItemDelete?: (itemId: string) => void;
+  // Memory props
+  memory?: any[];
+  onModifyThumbnail?: (item: any) => void;
+  onRegenerateThumbnail?: (item: any) => void;
   // Layout state
   showSidenav?: boolean;
   onToggleSidenav?: () => void;
 }
 
-type ThirdPanelMode = "config" | "history" | "none";
+type ThirdPanelMode = "config" | "history" | "memory" | "none";
 
 export function EnhancedLayout({
   className,
@@ -83,11 +92,11 @@ export function EnhancedLayout({
   onNewChat,
   onDeleteChat,
   onStarChat,
+  isSidenavLoading = false,
   // Chat props
   messages = [],
   onSendMessage,
   isLoading = false,
-  uploadedImage,
   // Config props
   thumbnailConfig,
   onConfigChange,
@@ -97,6 +106,10 @@ export function EnhancedLayout({
   history = [],
   onHistoryItemSelect,
   onHistoryItemDelete,
+  // Memory props
+  memory = [],
+  onModifyThumbnail,
+  onRegenerateThumbnail,
   // Layout state
   showSidenav = true,
   onToggleSidenav,
@@ -170,6 +183,19 @@ export function EnhancedLayout({
             >
               <History className="w-4 h-4" />
             </button>
+            
+            <button
+              onClick={() => handleModeChange("memory")}
+              className={cn(
+                "p-2 rounded-lg transition-colors",
+                thirdPanelMode === "memory" 
+                  ? "bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400" 
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              )}
+              title="Memory"
+            >
+              <Brain className="w-4 h-4" />
+            </button>
           </div>
         </div>
       );
@@ -182,8 +208,9 @@ export function EnhancedLayout({
           <div className="flex items-center gap-2">
             {thirdPanelMode === "config" && <Palette className="w-5 h-5 text-red-500" />}
             {thirdPanelMode === "history" && <History className="w-5 h-5 text-red-500" />}
+            {thirdPanelMode === "memory" && <Brain className="w-5 h-5 text-purple-500" />}
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              {thirdPanelMode === "config" ? "Settings" : "History"}
+              {thirdPanelMode === "config" ? "Settings" : thirdPanelMode === "history" ? "History" : "Memory"}
             </h3>
           </div>
           
@@ -215,6 +242,19 @@ export function EnhancedLayout({
             </button>
             
             <button
+              onClick={() => handleModeChange("memory")}
+              className={cn(
+                "p-2 rounded-lg transition-colors",
+                thirdPanelMode === "memory" 
+                  ? "bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400" 
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              )}
+              title="Memory"
+            >
+              <Brain className="w-4 h-4" />
+            </button>
+            
+            <button
               onClick={handleThirdPanelToggle}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Collapse panel"
@@ -242,6 +282,15 @@ export function EnhancedLayout({
               history={history}
               onItemSelect={onHistoryItemSelect}
               onItemDelete={onHistoryItemDelete}
+              className="h-full"
+            />
+          )}
+          
+          {thirdPanelMode === "memory" && (
+            <MemoryPanel
+              memory={memory}
+              onModifyThumbnail={onModifyThumbnail}
+              onRegenerateThumbnail={onRegenerateThumbnail}
               className="h-full"
             />
           )}
@@ -279,6 +328,7 @@ export function EnhancedLayout({
             onNewChat={onNewChat}
             onDeleteChat={onDeleteChat}
             onStarChat={onStarChat}
+            isLoading={isSidenavLoading}
           />
         </div>
       </div>
@@ -311,6 +361,7 @@ export function EnhancedLayout({
               messages={messages}
               onSendMessage={onSendMessage}
               isLoading={isLoading}
+              isGenerating={isGenerating}
               className="flex-1"
             />
           </div>

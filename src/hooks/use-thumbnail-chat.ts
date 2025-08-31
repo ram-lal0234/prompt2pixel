@@ -11,6 +11,7 @@ interface Message {
   timestamp: Date;
   thumbnailData?: string;
   referenceImageData?: string; // Base64 data for reference image used
+  configData?: ThumbnailConfig; // Config data used for thumbnail generation
 }
 
 interface AttachedFile {
@@ -29,6 +30,7 @@ interface UseThumbnailChatReturn {
   generateThumbnail: (config: ThumbnailConfig, chatId?: string) => Promise<string>;
   sendMessage: (content: string, attachedFiles?: AttachedFile[], chatId?: string) => Promise<void>;
   loadChat: (chatId: string) => Promise<void>;
+  loadChats: () => Promise<any[]>;
   clearChat: () => void;
 }
 
@@ -66,7 +68,7 @@ export function useThumbnailChat(): UseThumbnailChatReturn {
 
       // Create or get chat
       let chatIdToUse = chatId;
-      if (!chatIdToUse) {
+      if (!chatIdToUse || chatIdToUse.startsWith('temp-')) {
         const newChat = await chatService.createChat({
           userId: dbUser.id,
           title: config.videoTitle
@@ -308,9 +310,10 @@ export function useThumbnailChat(): UseThumbnailChatReturn {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: `🎉 I've generated a thumbnail based on your request: "${content}"`,
+          content: `🎉 I've generated a thumbnail for "${config.videoTitle}"`,
           timestamp: new Date(),
           thumbnailData: result.imageData,
+          configData: config, // Store the config used for generation
         };
 
         setMessages(prev => [...prev, aiMessage]);
@@ -321,7 +324,7 @@ export function useThumbnailChat(): UseThumbnailChatReturn {
           role: "assistant",
           content: aiMessage.content,
           thumbnailData: result.imageData,
-          configData: undefined,
+          configData: config, // Store the config used for generation
         });
 
       } else {
@@ -372,6 +375,21 @@ export function useThumbnailChat(): UseThumbnailChatReturn {
     }
   }, [currentChatId, user]);
 
+  const loadChats = useCallback(async () => {
+    if (!user) return [];
+
+    try {
+      const dbUser = await chatService.getUserByClerkId(user.id);
+      if (!dbUser) return [];
+
+      const chats = await chatService.getChats(dbUser.id);
+      return chats || [];
+    } catch (err) {
+      console.error('Failed to load chats:', err);
+      return [];
+    }
+  }, [user]);
+
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
@@ -385,6 +403,7 @@ export function useThumbnailChat(): UseThumbnailChatReturn {
     generateThumbnail,
     sendMessage,
     loadChat,
+    loadChats,
     clearChat,
   };
 }

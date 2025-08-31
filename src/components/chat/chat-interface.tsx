@@ -39,6 +39,7 @@ interface Message {
   }>;
   thumbnailData?: string; // Base64 data for generated thumbnails
   referenceImageData?: string; // Base64 data for reference image used
+  configData?: any; // Config data used for thumbnail generation
   originalRequest?: string;
   rewrittenQuery?: string;
   originalTitle?: string;

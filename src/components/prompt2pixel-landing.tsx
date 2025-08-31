@@ -38,40 +38,28 @@ const Prompt2PixelLanding = () => {
 
   const examples = [
     {
-      title: "YouTube Thumbnails",
-      description: "Create eye-catching thumbnails that boost click-through rates and drive more views to your videos",
-      icon: Video,
-      color: "red"
+      title: "Gaming Thumbnail",
+      description: "Dynamic gaming thumbnail with vibrant colors and action-packed composition",
+      image: "/examples/prompt2pixel-thumbnail-1756640481071.png",
+      category: "Gaming"
     },
     {
       title: "Educational Content",
-      description: "Design professional thumbnails for tutorials, courses, and educational videos with clear branding",
-      icon: Target,
-      color: "red"
+      description: "Professional educational thumbnail with clear typography and academic styling",
+      image: "/examples/prompt2pixel-1756640541069.png",
+      category: "Education"
     },
     {
-      title: "Gaming & Entertainment",
-      description: "Generate dynamic thumbnails for gaming content, reviews, and entertainment videos",
-      icon: Play,
-      color: "red"
+      title: "Entertainment Video",
+      description: "Eye-catching entertainment thumbnail with creative composition and engaging visuals",
+      image: "/examples/prompt2pixel-thumbnail-1756636028061.png",
+      category: "Entertainment"
     },
     {
-      title: "Business & Marketing",
-      description: "Create compelling thumbnails for business presentations, product launches, and marketing campaigns",
-      icon: TrendingUp,
-      color: "red"
-    },
-    {
-      title: "Lifestyle & Vlogs",
-      description: "Design authentic thumbnails that reflect your personal brand and connect with your audience",
-      icon: Users,
-      color: "red"
-    },
-    {
-      title: "Product Reviews",
-      description: "Generate attention-grabbing thumbnails for product reviews, unboxings, and comparisons",
-      icon: Star,
-      color: "red"
+      title: "Business Presentation",
+      description: "Professional business thumbnail with corporate aesthetics and clean design",
+      image: "/examples/prompt2pixel-1756630084988.png",
+      category: "Business"
     }
   ];
 
@@ -223,6 +211,7 @@ const Prompt2PixelLanding = () => {
             </SignInButton>
           </SignedOut>
           <motion.button
+            onClick={() => document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' })}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="px-8 py-4 rounded-full border border-gray-300 dark:border-white/20 text-gray-700 dark:text-white font-semibold text-lg backdrop-blur-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
@@ -234,61 +223,60 @@ const Prompt2PixelLanding = () => {
 
       {/* Examples Section */}
       <div id="examples" className="relative z-40 px-4 py-20">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-orange-500/5 to-yellow-500/5 rounded-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 dark:via-black/5 to-transparent"></div>
+        
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto relative"
         >
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-red-600 dark:from-white dark:to-red-200 bg-clip-text text-transparent">
-              Endless Possibilities
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-white/70 max-w-2xl mx-auto">
-              From YouTube thumbnails to social media graphics, see what's possible with AI-powered thumbnail generation
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {examples.map((example, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
+                className="group"
+                animate={{
+                  y: [0, -5, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  delay: index * 0.5,
+                  ease: "easeInOut"
+                }}
               >
-                <GlowCard glowColor="red" className="h-full">
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-red-500/20 mb-4">
-                      <example.icon className="w-6 h-6 text-red-400" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{example.title}</h3>
-                    <p className="text-gray-600 dark:text-white/70 flex-1">{example.description}</p>
-                    <SignedIn>
-                      <motion.button
-                        onClick={handleGetStarted}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 font-medium hover:bg-red-500/30 transition-all"
-                      >
-                        Try Now
-                      </motion.button>
-                    </SignedIn>
-                    <SignedOut>
-                      <SignInButton mode="modal">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 font-medium hover:bg-red-500/30 transition-all"
-                        >
-                          Try Now
-                        </motion.button>
-                      </SignInButton>
-                    </SignedOut>
+                <div className="relative overflow-hidden rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2">
+                  {/* Gradient Border Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  {/* Image Container */}
+                  <div className="relative overflow-hidden rounded-2xl">
+                    <img
+                      src={example.image}
+                      alt={example.title}
+                      className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    />
+                    
+                    {/* Shimmer Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+                    
+                    {/* Subtle Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
-                </GlowCard>
+                  
+                  {/* Glow Effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-red-500/50 via-orange-500/50 to-yellow-500/50 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                  
+                  {/* Pulse Effect */}
+                  <div className="absolute -inset-2 bg-gradient-to-r from-red-500/30 via-orange-500/30 to-yellow-500/30 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-20 animate-pulse"></div>
+                </div>
               </motion.div>
             ))}
           </div>

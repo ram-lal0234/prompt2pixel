@@ -118,107 +118,34 @@ export function HistoryPanel({
 
       {/* History List */}
       <div className="flex-1 overflow-y-auto">
-        {filteredHistory.length === 0 ? (
-          <div className="p-6 text-center">
-            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-              {searchQuery ? "No results found" : "No history yet"}
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {searchQuery 
-                ? "Try adjusting your search terms" 
-                : "Your generated thumbnails will appear here"
-              }
-            </p>
+        {/* Coming Soon Message */}
+        <div className="p-6 text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ImageIcon className="w-8 h-8 text-white" />
           </div>
-        ) : (
-          <div className="p-4 space-y-3">
-            {filteredHistory.map((item) => (
-              <div
-                key={item.id}
-                className={cn(
-                  "group relative p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md",
-                  selectedItem === item.id
-                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                )}
-                onClick={() => handleItemClick(item)}
-              >
-                {/* Thumbnail Preview */}
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                      <img
-                        src={`data:image/png;base64,${item.thumbnailData}`}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm text-gray-900 dark:text-white truncate mb-1">
-                      {item.title}
-                    </h4>
-                    <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(item.timestamp)}
-                      </span>
-                      <span className="capitalize">{item.config.niche}</span>
-                      <span>{item.config.size}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="flex gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // TODO: Implement view full size
-                        }}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
-                        title="View full size"
-                      >
-                        <Eye className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadImage(item.thumbnailData, `${item.title}-${Date.now()}.png`);
-                        }}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
-                        title="Download"
-                      >
-                        <Download className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={(e) => handleItemDelete(e, item.id)}
-                        className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      {history.length > 0 && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-            <span>{filteredHistory.length} of {history.length} items</span>
-            <span>Last updated: {formatDate(new Date())}</span>
+          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+            History Feature Coming Soon!
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            We're working on saving your generated thumbnails to history. 
+            This feature will be available soon!
+          </p>
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <h5 className="font-medium text-red-800 dark:text-red-200 mb-2">
+              🚀 What's Coming:
+            </h5>
+            <ul className="text-xs text-red-700 dark:text-red-300 space-y-1">
+              <li>• Save all generated thumbnails automatically</li>
+              <li>• Search and filter your history</li>
+              <li>• Download thumbnails anytime</li>
+              <li>• View full-size images in modal</li>
+              <li>• Modify and regenerate from history</li>
+            </ul>
           </div>
         </div>
-      )}
+      </div>
+
+
     </div>
   );
 }

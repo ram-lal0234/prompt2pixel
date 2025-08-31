@@ -19,6 +19,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { SidenavSkeleton } from "@/components/chat/sidenav-skeleton";
 
 import type { Database } from '@/lib/supabase'
 
@@ -32,6 +33,7 @@ interface SidenavProps {
   onNewChat?: () => void;
   onDeleteChat?: (chatId: string) => void;
   onStarChat?: (chatId: string, isStarred: boolean) => void;
+  isLoading?: boolean;
 }
 
 export function Sidenav({
@@ -42,6 +44,7 @@ export function Sidenav({
   onNewChat,
   onDeleteChat,
   onStarChat,
+  isLoading = false,
 }: SidenavProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
@@ -51,6 +54,8 @@ export function Sidenav({
     (chat) =>
       chat.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+
 
   return (
     <div
@@ -92,7 +97,19 @@ export function Sidenav({
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {filteredChats.length === 0 ? (
+        {isLoading ? (
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-3 p-3 rounded-lg">
+                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredChats.length === 0 ? (
           <div className="p-4 text-center text-gray-500 dark:text-gray-400">
             {searchQuery ? "No chats found" : "No chats yet"}
           </div>

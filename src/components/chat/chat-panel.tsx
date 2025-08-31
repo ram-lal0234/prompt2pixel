@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Send, Bot, Eye, Download, Paperclip, X, Sparkles } from 'lucide-react';
 import { ImageViewModal } from '@/components/image-view-modal';
+import { ChatSkeleton } from '@/components/chat/chat-skeleton';
 
 interface Message {
   id: string;
@@ -26,6 +27,7 @@ interface Message {
   timestamp: Date;
   thumbnailData?: string;
   referenceImageData?: string; // Base64 data for reference image used
+  configData?: any; // Config data used for thumbnail generation
 }
 
 interface AttachedFile {
@@ -40,6 +42,7 @@ interface ChatPanelProps {
   messages: Message[];
   onSendMessage: (message: string, attachedFiles?: AttachedFile[]) => void;
   isLoading?: boolean;
+  isGenerating?: boolean;
   className?: string;
 }
 
@@ -47,6 +50,7 @@ export function ChatPanel({
   messages, 
   onSendMessage, 
   isLoading = false,
+  isGenerating = false,
   className
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
@@ -54,6 +58,8 @@ export function ChatPanel({
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -154,21 +160,49 @@ export function ChatPanel({
         <Conversation>
           <ConversationContent className="pb-24">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                  <Bot className="w-10 h-10 text-white" />
+              isLoading ? (
+                <div className="p-4 space-y-4">
+                  {/* User Message Skeleton */}
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] space-y-2">
+                      <div className="h-4 bg-blue-200 dark:bg-blue-900/30 rounded-lg animate-pulse w-32" />
+                      <div className="h-4 bg-blue-200 dark:bg-blue-900/30 rounded-lg animate-pulse w-48" />
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16 ml-auto" />
+                    </div>
+                  </div>
+
+                  {/* AI Message Skeleton */}
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-40" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-56" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-36" />
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Skeleton */}
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-32" />
+                      <div className="w-64 h-36 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-24" />
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
-                  Start Chatting
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                  Ask questions about your generated thumbnail, request modifications, or get design suggestions
-                </p>
-
-
-
-
-              </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                    <Bot className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+                    Start Chatting
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                    Ask questions about your generated thumbnail, request modifications, or get design suggestions
+                  </p>
+                </div>
+              )
             ) : (
               messages.map((message) => (
                 <Message key={message.id} from={message.role}>
@@ -228,6 +262,27 @@ export function ChatPanel({
                 </Message>
               ))
             )}
+            
+            {/* Generating Indicator */}
+            {isGenerating && messages.length > 0 && (
+              <div className="flex justify-start p-4">
+                <div className="max-w-[80%] space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
+                      <Bot className="w-3 h-3 text-white" />
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Generating...
+                    </div>
+                  </div>
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </ConversationContent>
 
           <ConversationScrollButton className="bottom-28" />
@@ -281,14 +336,14 @@ export function ChatPanel({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about your thumbnail, request changes, or generate a new one..."
-            disabled={isLoading}
+            disabled={isGenerating}
           />
 
           <PromptInputToolbar>
             <PromptInputTools>
               <PromptInputButton
                 onClick={handleAttachFile}
-                disabled={isLoading}
+                disabled={isGenerating}
                 title="Attach image"
               >
                 <Paperclip className="w-4 h-4" />
@@ -296,10 +351,14 @@ export function ChatPanel({
             </PromptInputTools>
 
             <PromptInputSubmit
-              disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
+              disabled={(!input.trim() && attachedFiles.length === 0) || isGenerating}
               className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white transition-all"
             >
-              <Send className="w-4 h-4" />
+              {isGenerating ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </PromptInputSubmit>
           </PromptInputToolbar>
         </PromptInput>
