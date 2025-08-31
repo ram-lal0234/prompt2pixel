@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Lock, Loader2 } from 'lucide-react';
-import { useChat } from '@/hooks/use-chat';
-import { ClientOnly } from '@/components/client-only';
-import { EnhancedLayout } from '@/components/layout/enhanced-layout';
-import { useThumbnailChat } from '@/hooks/use-thumbnail-chat';
-import { ThumbnailConfig } from '@/components/chat/thumbnail-config';
+import { useState, useEffect } from "react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Lock, Loader2 } from "lucide-react";
+import { useChat } from "@/hooks/use-chat";
+import { ClientOnly } from "@/components/client-only";
+import { EnhancedLayout } from "@/components/layout/enhanced-layout";
+import { useThumbnailChat } from "@/hooks/use-thumbnail-chat";
+import { ThumbnailConfig } from "@/components/chat/thumbnail-config";
 
 function LoadingSpinner() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20 flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="w-12 h-12 text-red-500 animate-spin mx-auto mb-4" />
-        <p className="text-gray-600 dark:text-gray-300">Loading chat interface...</p>
+        <p className="text-gray-600 dark:text-gray-300">
+          Loading chat interface...
+        </p>
       </div>
     </div>
   );
@@ -30,21 +32,30 @@ function ChatPageContent() {
     createChat,
     loadChat: loadChatFromList,
     deleteChat,
-    toggleChatStar
+    toggleChatStar,
   } = useChat();
 
-  const { messages, isGenerating, error: chatError, currentChatId, generateThumbnail, sendMessage, loadChat, clearChat } = useThumbnailChat();
-  
+  const {
+    messages,
+    isGenerating,
+    error: chatError,
+    currentChatId,
+    generateThumbnail,
+    sendMessage,
+    loadChat,
+    clearChat,
+  } = useThumbnailChat();
+
   const [showSidenav, setShowSidenav] = useState(true);
   const [thumbnailConfig, setThumbnailConfig] = useState<ThumbnailConfig>({
-    videoTitle: '',
-    description: '',
-    primaryColor: '#DC2626',
-    secondaryColor: '#2563EB',
-    defaultImage: '',
-    defaultImagePreview: '',
-    niche: 'education',
-    size: '16:9',
+    videoTitle: "",
+    description: "",
+    primaryColor: "#DC2626",
+    secondaryColor: "#2563EB",
+    defaultImage: "",
+    defaultImagePreview: "",
+    niche: "education",
+    size: "16:9",
   });
 
   const handleChatSelect = async (chatId: string) => {
@@ -56,20 +67,20 @@ function ChatPageContent() {
   };
 
   const handleNewChat = async () => {
-    const newChat = await createChat('New Chat');
+    const newChat = await createChat("New Chat");
     if (newChat) {
       await loadChatFromList(newChat.id);
     }
     clearChat();
     setThumbnailConfig({
-      videoTitle: '',
-      description: '',
-      primaryColor: '#DC2626',
-      secondaryColor: '#2563EB',
-      defaultImage: '',
-      defaultImagePreview: '',
-      niche: 'education',
-      size: '16:9',
+      videoTitle: "",
+      description: "",
+      primaryColor: "#DC2626",
+      secondaryColor: "#2563EB",
+      defaultImage: "",
+      defaultImagePreview: "",
+      niche: "education",
+      size: "16:9",
     });
     // Close sidenav on mobile after creating a new chat
     if (window.innerWidth < 1024) {
@@ -87,15 +98,18 @@ function ChatPageContent() {
 
   const handleGenerateThumbnail = async () => {
     try {
-      const chatId = await generateThumbnail(thumbnailConfig, currentChatId || undefined);
-      
+      const chatId = await generateThumbnail(
+        thumbnailConfig,
+        currentChatId || undefined
+      );
+
       // Update the chat list to reflect the new chat
       if (!currentChatId) {
         // This is a new chat, refresh the chat list
         // The useChat hook should handle this automatically
       }
     } catch (error) {
-      console.error('Failed to generate thumbnail:', error);
+      console.error("Failed to generate thumbnail:", error);
     }
   };
 
@@ -119,10 +133,7 @@ function ChatPageContent() {
         onStarChat={handleStarChat}
         // Chat props
         messages={messages}
-        onSendMessage={(message, attachedFiles) => {
-          // Handle attached files if needed
-          sendMessage(message);
-        }}
+        onSendMessage={sendMessage}
         isLoading={isGenerating}
         // Config props
         thumbnailConfig={thumbnailConfig}
@@ -133,11 +144,11 @@ function ChatPageContent() {
         history={[]} // TODO: Implement history from Supabase
         onHistoryItemSelect={(item) => {
           // TODO: Load item config and regenerate
-          console.log('History item selected:', item);
+          console.log("History item selected:", item);
         }}
         onHistoryItemDelete={(itemId) => {
           // TODO: Delete from Supabase
-          console.log('History item deleted:', itemId);
+          console.log("History item deleted:", itemId);
         }}
         // Layout state
         showSidenav={showSidenav}
@@ -158,11 +169,12 @@ function AuthRequiredMessage() {
           Authentication Required
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-          You need to be signed in to access the chat interface. Sign in to start creating amazing thumbnails with AI.
+          You need to be signed in to access the chat interface. Sign in to
+          start creating amazing thumbnails with AI.
         </p>
         <SignInButton mode="modal">
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="text-lg px-8 py-6 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             Sign In to Continue
@@ -175,8 +187,8 @@ function AuthRequiredMessage() {
 }
 
 export default function ChatPage() {
-  console.log('ChatPage component rendered');
-  
+  console.log("ChatPage component rendered");
+
   return (
     <>
       <SignedIn>

@@ -141,16 +141,28 @@ Make it comprehensive and detailed for professional thumbnail generation.`,
 }
 
 export async function POST(request: NextRequest) {
-  console.log("Generating thumbnail", request);
+  console.log("=== Generate Thumbnail API Called ===");
+  
   // Check authentication
   const { userId } = await auth();
   if (!userId) {
+    console.log("Authentication failed: No userId");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  console.log("User authenticated:", userId);
+
   try {
     const body = await request.json();
-    console.log("Body:", body);
+    console.log("Request body received:", {
+      hasPrompt: !!body.prompt,
+      hasConfig: !!body.config,
+      hasImageData: !!body.imageData,
+      imageDataLength: body.imageData?.length || 0,
+      configKeys: body.config ? Object.keys(body.config) : [],
+      hasDefaultImagePreview: !!body.config?.defaultImagePreview,
+      defaultImagePreviewType: body.config?.defaultImagePreview ? (body.config.defaultImagePreview.startsWith('data:') ? 'data-url' : 'url') : 'none'
+    });
     const {
       prompt,
       config = {
@@ -169,9 +181,19 @@ export async function POST(request: NextRequest) {
     console.log("Thumbnail config received:", config);
 
     // Validate required fields
-    if (!prompt) {
+    if (!prompt || !prompt.trim()) {
+      console.log("Validation failed: Empty or missing prompt");
       return NextResponse.json(
-        { error: "Prompt is required" },
+        { error: "Prompt is required and cannot be empty" },
+        { status: 400 }
+      );
+    }
+
+    // Additional validation for minimum prompt length
+    if (prompt.trim().length < 3) {
+      console.log("Validation failed: Prompt too short:", prompt);
+      return NextResponse.json(
+        { error: "Prompt must be at least 3 characters long" },
         { status: 400 }
       );
     }
@@ -195,13 +217,26 @@ export async function POST(request: NextRequest) {
       config,
     });
 
-    console.log("Final prompt for Gemini:", finalPrompt);
+    console.log("=== FINAL PROMPT FOR GEMINI ===");
+    console.log("Prompt length:", finalPrompt.length);
+    console.log("First 500 characters:", finalPrompt.substring(0, 500));
+    console.log("Last 500 characters:", finalPrompt.substring(finalPrompt.length - 500));
+    console.log("=== END FINAL PROMPT ===");
 
     // Step 4: Generate thumbnail using Gemini
     let response;
 
+    console.log("Image processing decision:", {
+      hasImageData: !!imageData,
+      hasDefaultImagePreview: !!config.defaultImagePreview,
+      imageDataLength: imageData?.length || 0,
+      defaultImagePreviewLength: config.defaultImagePreview?.length || 0,
+      willUseReferenceImage: !!(imageData || config.defaultImagePreview),
+      promptType: config.defaultImagePreview ? "Reference Image Enhancement" : "New Image Generation"
+    });
+
     if (imageData) {
-      // Image + Text to Image (editing existing image)
+      // Image + Text to Image (editing existing image from attached files)
       const imagePart = {
         inlineData: {
           mimeType: imageMimeType || "image/png",
@@ -209,22 +244,64 @@ export async function POST(request: NextRequest) {
         },
       };
 
-      console.log("Generating thumbnail with image data");
+      console.log("Generating thumbnail with attached image data");
+      console.log("Sending to Gemini:", {
+        model: "gemini-2.5-flash-image-preview",
+        hasPrompt: !!finalPrompt,
+        hasImagePart: !!imagePart,
+        imageMimeType: imageMimeType || "image/png",
+        imageDataLength: imageData?.length || 0
+      });
       response = await genAI.models.generateContent({
         model: "gemini-2.5-flash-image-preview",
         contents: [finalPrompt, imagePart],
       });
-    } else if (config.defaultImagePreview) {
+    } else if (config.defaultImagePreview && config.defaultImagePreview.trim()) {
       // Use default image from config
-      const defaultImageData = config.defaultImagePreview.split(",")[1]; // Remove data URL prefix
+      console.log("Processing default image from config");
+      console.log("Default image preview type:", config.defaultImagePreview.startsWith('data:') ? 'data-url' : 'url');
+      console.log("Default image preview length:", config.defaultImagePreview.length);
+      
+      let defaultImageData;
+      if (config.defaultImagePreview.startsWith('data:')) {
+        // It's already a data URL
+        defaultImageData = config.defaultImagePreview.split(",")[1]; // Remove data URL prefix
+        console.log("Extracted base64 data length:", defaultImageData.length);
+      } else {
+        // It's a regular URL, we need to fetch and convert
+        console.log("Fetching image from URL:", config.defaultImagePreview);
+        const response = await fetch(config.defaultImagePreview);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        defaultImageData = Buffer.from(arrayBuffer).toString('base64');
+        console.log("Converted URL to base64 data length:", defaultImageData.length);
+      }
+      
+      // Detect MIME type from data URL
+      let mimeType = "image/png"; // default
+      if (config.defaultImagePreview.startsWith('data:')) {
+        const mimeMatch = config.defaultImagePreview.match(/data:([^;]+)/);
+        if (mimeMatch) {
+          mimeType = mimeMatch[1];
+        }
+      }
+      
       const imagePart = {
         inlineData: {
-          mimeType: "image/png",
+          mimeType: mimeType,
           data: defaultImageData,
         },
       };
 
       console.log("Generating thumbnail with default image from config");
+      console.log("Using MIME type:", mimeType);
+      console.log("Sending to Gemini:", {
+        model: "gemini-2.5-flash-image-preview",
+        hasPrompt: !!finalPrompt,
+        hasImagePart: !!imagePart,
+        imageMimeType: mimeType,
+        imageDataLength: defaultImageData?.length || 0
+      });
       response = await genAI.models.generateContent({
         model: "gemini-2.5-flash-image-preview",
         contents: [finalPrompt, imagePart],
@@ -232,6 +309,11 @@ export async function POST(request: NextRequest) {
     } else {
       // Text to Image (generating new image)
       console.log("Generating thumbnail with text only");
+      console.log("Sending to Gemini:", {
+        model: "gemini-2.5-flash-image-preview",
+        hasPrompt: !!finalPrompt,
+        promptLength: finalPrompt.length
+      });
       response = await genAI.models.generateContent({
         model: "gemini-2.5-flash-image-preview",
         contents: finalPrompt,
@@ -239,8 +321,10 @@ export async function POST(request: NextRequest) {
     }
 
     const result = response;
-    console.log("Gemini response received");
+    console.log("=== GEMINI RESPONSE RECEIVED ===");
     console.log("Response candidates:", result.candidates?.length || 0);
+    console.log("Response ID:", result.responseId || "No response ID");
+    console.log("Response finish reason:", result.candidates?.[0]?.finishReason || "Unknown");
 
     // Extract the generated image
     for (const part of result.candidates?.[0]?.content?.parts || []) {
@@ -433,7 +517,19 @@ function createThumbnailPrompt({
       break;
   }
 
-  return `Create a professional, high-impact thumbnail with the following detailed specifications:
+  return `${
+  config.defaultImagePreview
+    ? `IMPORTANT INSTRUCTIONS: You have been provided with a reference image. Your task is to ENHANCE and MODIFY this existing image to create a professional thumbnail. DO NOT create a completely new image from scratch. Instead, use the reference image as your base and apply the following improvements:
+
+1. Keep the main elements and composition from the reference image
+2. Enhance the colors, lighting, and visual effects
+3. Add or modify text elements as specified
+4. Apply the styling and branding requirements below
+5. Maintain the core visual identity of the original image
+
+Reference Image Context: The user has provided an image that they want enhanced into a professional thumbnail.`
+    : `Create a professional, high-impact thumbnail from scratch with the following detailed specifications:`
+  }
 
 ENHANCED CONTENT DESCRIPTION:
 ${prompt}
@@ -507,9 +603,18 @@ QUALITY STANDARDS:
 - Click-Worthy: Designed to maximize click-through rates
 ${
   config.defaultImagePreview
-    ? "- Reference Integration: Seamlessly incorporate provided reference image while enhancing with above specifications"
+    ? `- Reference Image Enhancement: The provided reference image should be the foundation of your work. Enhance it by:
+  * Maintaining the core visual elements and composition
+  * Improving colors, contrast, and lighting
+  * Adding professional text overlays and branding
+  * Applying the specified styling and effects
+  * Ensuring the final result looks like an enhanced version of the original`
     : ""
 }
 
-Generate a thumbnail that combines all these elements into a cohesive, professional, and highly engaging design that will perform exceptionally well on social media platforms and drive maximum engagement.`;
+${
+  config.defaultImagePreview
+    ? `Generate an enhanced version of the reference image that incorporates all the above specifications while maintaining the original image's core identity and improving it for professional thumbnail use.`
+    : `Generate a thumbnail that combines all these elements into a cohesive, professional, and highly engaging design that will perform exceptionally well on social media platforms and drive maximum engagement.`
+}`;
 }

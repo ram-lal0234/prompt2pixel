@@ -26,6 +26,14 @@ interface Message {
   thumbnailData?: string;
 }
 
+interface AttachedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url?: string;
+}
+
 interface ThumbnailConfigType {
   videoTitle: string;
   description: string;
@@ -48,7 +56,7 @@ interface EnhancedLayoutProps {
   onStarChat?: (chatId: string, isStarred: boolean) => void;
   // Chat props
   messages?: Message[];
-  onSendMessage?: (message: string, attachedFiles?: any[]) => void;
+  onSendMessage?: (message: string, attachedFiles?: AttachedFile[]) => void;
   isLoading?: boolean;
   // Config props
   thumbnailConfig?: ThumbnailConfigType;

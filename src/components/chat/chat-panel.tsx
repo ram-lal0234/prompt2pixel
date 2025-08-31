@@ -16,7 +16,7 @@ import {
   PromptInputSubmit,
 } from '@/components/prompt-input';
 import { cn } from '@/lib/utils';
-import { Send, Bot, Eye, Download, Paperclip, X } from 'lucide-react';
+import { Send, Bot, Eye, Download, Paperclip, X, Sparkles } from 'lucide-react';
 import { ImageViewModal } from '@/components/image-view-modal';
 
 interface Message {
@@ -25,6 +25,7 @@ interface Message {
   content: string;
   timestamp: Date;
   thumbnailData?: string;
+  referenceImageData?: string; // Base64 data for reference image used
 }
 
 interface AttachedFile {
@@ -144,6 +145,8 @@ export function ChatPanel({
     }
   };
 
+
+
   return (
     <div className={cn("flex flex-col h-full bg-white dark:bg-gray-900", className)}>
       {/* Messages Area */}
@@ -162,33 +165,9 @@ export function ChatPanel({
                   Ask questions about your generated thumbnail, request modifications, or get design suggestions
                 </p>
 
-                {/* Quick suggestions */}
-                <div className="grid grid-cols-1 gap-3 max-w-md w-full">
-                  <button
-                    onClick={() => onSendMessage("How can I improve this thumbnail?")}
-                    className="p-3 text-left bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      💡 How can I improve this thumbnail?
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => onSendMessage("What colors would work better?")}
-                    className="p-3 text-left bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      🎨 What colors would work better?
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => onSendMessage("Can you suggest a different style?")}
-                    className="p-3 text-left bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      ✨ Can you suggest a different style?
-                    </p>
-                  </button>
-                </div>
+
+
+
               </div>
             ) : (
               messages.map((message) => (
@@ -204,40 +183,43 @@ export function ChatPanel({
                   <MessageContent>
                     {message.content}
 
+                    {/* Display reference images in user messages */}
+                    {message.referenceImageData && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="relative">
+                          <img
+                            src={`data:image/png;base64,${message.referenceImageData}`}
+                            alt="Reference image"
+                            className="max-w-32 max-h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {/* Display generated thumbnail */}
                     {message.thumbnailData && (
-                      <div className="mt-6 p-6 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border border-red-200 dark:border-red-800 shadow-lg">
-                        <h4 className="font-bold text-red-800 dark:text-red-200 mb-4 text-lg flex items-center gap-2">
-                          <span className="text-xl">🎨</span>
-                          Generated Thumbnail
-                        </h4>
-                        <div className="flex justify-center">
-                          <div className="max-w-2xl w-full">
-                            <div className="relative group">
-                              <div className="aspect-video bg-white dark:bg-gray-900 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-xl">
-                                <img
-                                  src={`data:image/png;base64,${message.thumbnailData}`}
-                                  alt="Generated thumbnail"
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  onClick={() => openImageModal(message.thumbnailData!)}
-                                  className="bg-gray-800/90 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-sm shadow-lg"
-                                  title="View full size"
-                                >
-                                  <Eye className="w-5 h-5" />
-                                </button>
-                                <button
-                                  onClick={() => downloadImage(message.thumbnailData!, `prompt2pixel-${Date.now()}.png`)}
-                                  className="bg-gray-800/90 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-sm shadow-lg"
-                                  title="Download image"
-                                >
-                                  <Download className="w-5 h-5" />
-                                </button>
-                              </div>
-                            </div>
+                      <div className="mt-3">
+                        <div className="relative group inline-block">
+                          <img
+                            src={`data:image/png;base64,${message.thumbnailData}`}
+                            alt="Generated thumbnail"
+                            className="max-w-64 max-h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                          />
+                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => openImageModal(message.thumbnailData!)}
+                              className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
+                              title="View full size"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => downloadImage(message.thumbnailData!, `prompt2pixel-${Date.now()}.png`)}
+                              className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
+                              title="Download image"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -298,7 +280,7 @@ export function ChatPanel({
           <PromptInputTextarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your thumbnail or request changes..."
+            placeholder="Ask about your thumbnail, request changes, or generate a new one..."
             disabled={isLoading}
           />
 

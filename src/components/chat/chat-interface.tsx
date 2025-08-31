@@ -38,6 +38,7 @@ interface Message {
     url: string;
   }>;
   thumbnailData?: string; // Base64 data for generated thumbnails
+  referenceImageData?: string; // Base64 data for reference image used
   originalRequest?: string;
   rewrittenQuery?: string;
   originalTitle?: string;
@@ -73,6 +74,7 @@ export function ChatInterface({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [thumbnailConfig, setThumbnailConfig] = useState<ThumbnailConfigType>({
     videoTitle: '',
+    description: '',
     primaryColor: '#DC2626',
     secondaryColor: '#2563EB',
     defaultImage: '',
@@ -126,6 +128,11 @@ export function ChatInterface({
   };
 
   const openImageModal = (imageData: string) => {
+    setModalImage(imageData);
+    setIsModalOpen(true);
+  };
+
+  const openReferenceImageModal = (imageData: string) => {
     setModalImage(imageData);
     setIsModalOpen(true);
   };
@@ -198,6 +205,7 @@ export function ChatInterface({
           content: "Here's your generated thumbnail!",
           timestamp: new Date(),
           thumbnailData: result.imageData,
+          referenceImageData: thumbnailConfig.defaultImagePreview ? thumbnailConfig.defaultImagePreview.split(',')[1] : undefined,
           originalTitle: result.originalTitle,
           rewrittenTitle: result.rewrittenTitle,
         };
@@ -225,16 +233,17 @@ export function ChatInterface({
     setInput("");
     setAttachedFiles([]);
     setError(null);
-    // Reset thumbnail config to defaults
-    setThumbnailConfig({
-      videoTitle: '',
-      primaryColor: '#DC2626',
-      secondaryColor: '#2563EB',
-      defaultImage: '',
-      defaultImagePreview: '',
-      niche: 'education',
-      size: '16:9',
-    });
+            // Reset thumbnail config to defaults
+        setThumbnailConfig({
+          videoTitle: '',
+          description: '',
+          primaryColor: '#DC2626',
+          secondaryColor: '#2563EB',
+          defaultImage: '',
+          defaultImagePreview: '',
+          niche: 'education',
+          size: '16:9',
+        });
     onNewChat?.();
   };
 
@@ -357,50 +366,56 @@ export function ChatInterface({
                         )}
                         {message.content}
 
-                        {/* Display uploaded images */}
-                        {message.images && message.images.length > 0 && (
+                        {/* Display uploaded images and reference images */}
+                        {(message.images && message.images.length > 0) || message.referenceImageData ? (
                           <div className="flex flex-wrap gap-2 mt-3">
-                            {message.images.map((image) => (
+                            {/* Uploaded images */}
+                            {message.images && message.images.map((image) => (
                               <div key={image.id} className="relative">
                                 <img
                                   src={image.url}
                                   alt={image.name}
-                                  className="max-w-48 max-h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                  className="max-w-32 max-h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
                                 />
                               </div>
                             ))}
+                            {/* Reference image */}
+                            {message.referenceImageData && (
+                              <div className="relative">
+                                <img
+                                  src={`data:image/png;base64,${message.referenceImageData}`}
+                                  alt="Reference image"
+                                  className="max-w-32 max-h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                />
+                              </div>
+                            )}
                           </div>
-                        )}
+                        ) : null}
 
                         {/* Display generated thumbnail */}
                         {message.thumbnailData && (
-                          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                            <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
-                              🎨 Generated Thumbnail
-                            </h4>
-                            <div className="flex flex-wrap gap-4">
-                              <div className="relative group">
-                                <img
-                                  src={`data:image/png;base64,${message.thumbnailData}`}
-                                  alt="Generated image"
-                                  className="max-w-64 max-h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
-                                />
-                                <div className="absolute top-2 right-2 flex gap-1">
-                                  <button
-                                    onClick={() => openImageModal(message.thumbnailData!)}
-                                    className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
-                                    title="View image"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => downloadImage(message.thumbnailData!, `prompt2pixel-${Date.now()}.png`)}
-                                    className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
-                                    title="Download image"
-                                  >
-                                    <Download className="w-4 h-4" />
-                                  </button>
-                                </div>
+                          <div className="mt-3">
+                            <div className="relative group inline-block">
+                              <img
+                                src={`data:image/png;base64,${message.thumbnailData}`}
+                                alt="Generated thumbnail"
+                                className="max-w-64 max-h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                              />
+                              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => openImageModal(message.thumbnailData!)}
+                                  className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
+                                  title="View full size"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => downloadImage(message.thumbnailData!, `prompt2pixel-${Date.now()}.png`)}
+                                  className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
+                                  title="Download image"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -545,8 +560,7 @@ export function ChatInterface({
           isOpen={isModalOpen}
           onClose={closeImageModal}
           imageData={modalImage}
-          alt="Generated image"
-          onDownload={(imageData) => downloadImage(imageData, `prompt2pixel-${Date.now()}.png`)}
+          fileName="prompt2pixel"
         />
       )}
 
