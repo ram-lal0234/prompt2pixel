@@ -322,9 +322,9 @@ export function ChatInterface({
   return (
     <div className={cn("flex h-full relative", className)}>
       {/* Main Chat Area - Center */}
-      <div className="flex-1 flex flex-col lg:mr-80">
+      <div className="flex-1 flex flex-col xl:mr-80 bg-white dark:bg-gray-900">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
           <div className="max-w-4xl mx-auto px-4">
             <Conversation>
               <ConversationContent className="pb-24">
@@ -472,7 +472,7 @@ export function ChatInterface({
         )}
 
         {/* Fixed Input Area */}
-        <div className="sticky bottom-0 p-4">
+        <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900">
           <div className="max-w-4xl mx-auto">
             <PromptInput onSubmit={handleFormSubmit}>
               {/* Attached Files Display */}
@@ -546,7 +546,7 @@ export function ChatInterface({
       </div>
 
       {/* Right Sidebar - Thumbnail Configuration */}
-      <div className="hidden lg:block w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 fixed right-0 top-0 h-full overflow-y-auto z-10">
+      <div className="hidden xl:block w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 fixed right-0 top-0 h-full overflow-y-auto z-10">
         <div className="p-6">
           <ThumbnailConfig
             config={thumbnailConfig}

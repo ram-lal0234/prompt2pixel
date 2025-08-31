@@ -334,7 +334,7 @@ export function EnhancedLayout({
       </div>
 
       {/* Main Content Area - Scrollable */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white dark:bg-gray-900">
         {/* Mobile Header */}
         {isMobile && (
           <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
@@ -354,9 +354,9 @@ export function EnhancedLayout({
         )}
 
         {/* Chat Interface - Scrollable */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden bg-white dark:bg-gray-900">
           {/* Chat Panel - Scrollable */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white dark:bg-gray-900">
             <ChatPanel
               messages={messages}
               onSendMessage={onSendMessage}

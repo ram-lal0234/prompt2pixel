@@ -102,6 +102,11 @@ const ALLOWED_GREETINGS = [
 
 // Function to check if the request is thumbnail-related or an allowed greeting
 function isThumbnailRelatedRequest(userMessage: string): boolean {
+  // Safety check for undefined or null message
+  if (!userMessage || typeof userMessage !== 'string') {
+    return false;
+  }
+  
   const lowerMessage = userMessage.toLowerCase().trim();
 
   // Allow common greetings and basic interactions
@@ -175,6 +180,11 @@ function isThumbnailRelatedRequest(userMessage: string): boolean {
 
 // Function to detect if user wants to create a thumbnail
 function isThumbnailCreationRequest(userMessage: string): boolean {
+  // Safety check for undefined or null message
+  if (!userMessage || typeof userMessage !== 'string') {
+    return false;
+  }
+  
   const lowerMessage = userMessage.toLowerCase().trim();
 
   // Check for creation keywords
@@ -369,6 +379,14 @@ export async function POST(request: NextRequest) {
     // Get the latest user message
     const latestUserMessage =
       messages.filter((msg) => msg.role === "user").pop()?.content || "";
+    
+    // Safety check for undefined content
+    if (!latestUserMessage || typeof latestUserMessage !== 'string') {
+      return NextResponse.json(
+        { error: "Invalid message content" },
+        { status: 400 }
+      );
+    }
 
     console.log("User message:", latestUserMessage);
     console.log(

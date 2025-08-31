@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { Message, MessageContent, MessageAvatar } from '@/components/message';
+import { useState, useRef } from "react";
+import { Message, MessageContent, MessageAvatar } from "@/components/message";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from '@/components/conversation';
+} from "@/components/conversation";
 import {
   PromptInput,
   PromptInputTextarea,
@@ -14,11 +14,11 @@ import {
   PromptInputTools,
   PromptInputButton,
   PromptInputSubmit,
-} from '@/components/prompt-input';
-import { cn } from '@/lib/utils';
-import { Send, Bot, Eye, Download, Paperclip, X, Sparkles } from 'lucide-react';
-import { ImageViewModal } from '@/components/image-view-modal';
-import { ChatSkeleton } from '@/components/chat/chat-skeleton';
+} from "@/components/prompt-input";
+import { cn } from "@/lib/utils";
+import { Send, Bot, Eye, Download, Paperclip, X, Sparkles } from "lucide-react";
+import { ImageViewModal } from "@/components/image-view-modal";
+import { ChatSkeleton } from "@/components/chat/chat-skeleton";
 
 interface Message {
   id: string;
@@ -46,20 +46,18 @@ interface ChatPanelProps {
   className?: string;
 }
 
-export function ChatPanel({ 
-  messages, 
-  onSendMessage, 
+export function ChatPanel({
+  messages,
+  onSendMessage,
   isLoading = false,
   isGenerating = false,
-  className
+  className,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -120,7 +118,7 @@ export function ChatPanel({
 
   const removeAttachedFile = (fileId: string) => {
     setAttachedFiles((prev) => {
-      const fileToRemove = prev.find(file => file.id === fileId);
+      const fileToRemove = prev.find((file) => file.id === fileId);
       if (fileToRemove?.url) {
         URL.revokeObjectURL(fileToRemove.url);
       }
@@ -138,25 +136,31 @@ export function ChatPanel({
     setModalImage(null);
   };
 
-  const downloadImage = (imageData: string, filename: string = 'thumbnail.png') => {
+  const downloadImage = (
+    imageData: string,
+    filename: string = "thumbnail.png"
+  ) => {
     try {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = `data:image/png;base64,${imageData}`;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error('Error downloading image:', error);
+      console.error("Error downloading image:", error);
     }
   };
 
-
-
   return (
-    <div className={cn("flex flex-col h-full bg-white dark:bg-gray-900", className)}>
+    <div
+      className={cn(
+        "flex flex-col h-full bg-white dark:bg-gray-900",
+        className
+      )}
+    >
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
         <Conversation>
           <ConversationContent className="pb-24">
             {messages.length === 0 ? (
@@ -199,7 +203,8 @@ export function ChatPanel({
                     Start Chatting
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                    Ask questions about your generated thumbnail, request modifications, or get design suggestions
+                    Ask questions about your generated thumbnail, request
+                    modifications, or get design suggestions
                   </p>
                 </div>
               )
@@ -241,14 +246,21 @@ export function ChatPanel({
                           />
                           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
-                              onClick={() => openImageModal(message.thumbnailData!)}
+                              onClick={() =>
+                                openImageModal(message.thumbnailData!)
+                              }
                               className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
                               title="View full size"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => downloadImage(message.thumbnailData!, `prompt2pixel-${Date.now()}.png`)}
+                              onClick={() =>
+                                downloadImage(
+                                  message.thumbnailData!,
+                                  `prompt2pixel-${Date.now()}.png`
+                                )
+                              }
                               className="bg-gray-800/80 hover:bg-gray-700/90 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
                               title="Download image"
                             >
@@ -262,7 +274,7 @@ export function ChatPanel({
                 </Message>
               ))
             )}
-            
+
             {/* Generating Indicator */}
             {isGenerating && messages.length > 0 && (
               <div className="flex justify-start p-4">
@@ -277,8 +289,14 @@ export function ChatPanel({
                   </div>
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -351,7 +369,9 @@ export function ChatPanel({
             </PromptInputTools>
 
             <PromptInputSubmit
-              disabled={(!input.trim() && attachedFiles.length === 0) || isGenerating}
+              disabled={
+                (!input.trim() && attachedFiles.length === 0) || isGenerating
+              }
               className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white transition-all"
             >
               {isGenerating ? (

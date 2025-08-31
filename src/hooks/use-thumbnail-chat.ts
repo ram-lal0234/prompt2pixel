@@ -347,25 +347,67 @@ export function useThumbnailChat(): UseThumbnailChatReturn {
           configData: undefined,
         });
 
-        // TODO: Implement AI chat response
-        // For now, just add a simple response
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: "I understand your question about the thumbnail. This feature is coming soon!",
-          timestamp: new Date(),
-        };
+        // Call the chat API for AI response
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messages: [
+                ...(messages || []),
+                { role: "user", content: content }
+              ]
+            }),
+          });
 
-        setMessages(prev => [...prev, aiMessage]);
+          const result = await response.json();
 
-        // Save AI message to Supabase
-        await chatService.createMessage({
-          chatId: chatIdToUse,
-          role: "assistant",
-          content: aiMessage.content,
-          thumbnailData: undefined,
-          configData: undefined,
-        });
+          if (result.success) {
+            const aiMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: result.message,
+              timestamp: new Date(),
+              thumbnailData: result.thumbnailData,
+            };
+
+            setMessages(prev => [...prev, aiMessage]);
+
+            // Save AI message to Supabase
+            await chatService.createMessage({
+              chatId: chatIdToUse,
+              role: "assistant",
+              content: aiMessage.content,
+              thumbnailData: result.thumbnailData,
+              configData: undefined,
+            });
+          } else {
+            throw new Error(result.error || "Failed to get AI response");
+          }
+        } catch (error) {
+          console.error("Error calling chat API:", error);
+          
+          // Fallback response
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "I'm here to help you with thumbnail creation and YouTube content strategy! What would you like to know about creating engaging thumbnails?",
+            timestamp: new Date(),
+          };
+
+          setMessages(prev => [...prev, aiMessage]);
+
+          // Save AI message to Supabase
+          await chatService.createMessage({
+            chatId: chatIdToUse,
+            role: "assistant",
+            content: aiMessage.content,
+            thumbnailData: undefined,
+            configData: undefined,
+          });
+        }
       }
 
     } catch (err) {
