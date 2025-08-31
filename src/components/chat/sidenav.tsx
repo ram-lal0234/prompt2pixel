@@ -67,7 +67,7 @@ export function Sidenav({
       {/* Navigation Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-center">
-          <h1 className="text-xl font-bold">Thumb AI</h1>
+          <img src="/Prompt2Pixel_logo.png" alt="Thumb AI" className="w-full h-16" />
         </div>
       </div>
 

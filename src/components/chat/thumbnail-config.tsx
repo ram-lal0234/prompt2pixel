@@ -99,6 +99,13 @@ export function ThumbnailConfig({
     onConfigChange(DEFAULT_CONFIG);
   };
 
+  // Reset only the video title
+  const resetTitle = () => {
+    const newConfig = { ...localConfig, videoTitle: '' };
+    setLocalConfig(newConfig);
+    onConfigChange(newConfig);
+  };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -166,7 +173,7 @@ export function ThumbnailConfig({
       <Input
         value={color}
         onChange={(e) => onChange(e.target.value)}
-        className="w-20 h-8 text-xs font-mono"
+        className="w-full h-8 text-xs font-mono"
         placeholder="#000000"
       />
     </div>

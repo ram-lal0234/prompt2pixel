@@ -77,6 +77,8 @@ export async function POST(request: NextRequest) {
       imageMimeType,
     } = body;
 
+    console.log("Thumbnail config received:", config);
+
     // Validate required fields
     if (!prompt) {
       return NextResponse.json(

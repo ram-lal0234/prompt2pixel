@@ -6,6 +6,7 @@ import { ChatInterface } from '@/components/chat/chat-interface';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { ChatHeader } from '@/components/chat-header';
 
 interface Chat {
   id: string;
@@ -93,54 +94,60 @@ function ChatPageContent() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile Overlay */}
-      {showSidenav && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setShowSidenav(false)}
-        />
-      )}
+    <div className="h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <ChatHeader />
+      
+      {/* Main Content */}
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Mobile Overlay */}
+        {showSidenav && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowSidenav(false)}
+          />
+        )}
 
-      {/* Sidenav */}
-      <div className={`
-        fixed lg:relative lg:block
-        ${showSidenav ? 'block' : 'hidden lg:block'}
-        lg:w-80 w-80
-        h-full
-        z-50 lg:z-auto
-        transition-all duration-300 ease-in-out
-      `}>
-        <Sidenav
-          chats={chats}
-          activeChatId={activeChatId || undefined}
-          onChatSelect={handleChatSelect}
-          onNewChat={handleNewChat}
-          onDeleteChat={handleDeleteChat}
-          onStarChat={handleStarChat}
-        />
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Mobile Toggle Button */}
-        <div className="lg:hidden p-2 border-b border-gray-200 dark:border-gray-800">
-          <button
-            onClick={() => setShowSidenav(!showSidenav)}
-            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+        {/* Sidenav */}
+        <div className={`
+          fixed lg:relative lg:block
+          ${showSidenav ? 'block' : 'hidden lg:block'}
+          lg:w-80 w-80
+          h-full
+          z-50 lg:z-auto
+          transition-all duration-300 ease-in-out
+        `}>
+          <Sidenav
+            chats={chats}
+            activeChatId={activeChatId || undefined}
+            onChatSelect={handleChatSelect}
+            onNewChat={handleNewChat}
+            onDeleteChat={handleDeleteChat}
+            onStarChat={handleStarChat}
+          />
         </div>
 
-        {/* Chat Interface */}
-        <div className="flex-1 min-h-0">
-          <ChatInterface
-            chatId={activeChatId || undefined}
-            onNewChat={handleNewChat}
-          />
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Mobile Toggle Button */}
+          <div className="lg:hidden p-2 border-b border-gray-200 dark:border-gray-800">
+            <button
+              onClick={() => setShowSidenav(!showSidenav)}
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Chat Interface */}
+          <div className="flex-1 min-h-0">
+            <ChatInterface
+              chatId={activeChatId || undefined}
+              onNewChat={handleNewChat}
+            />
+          </div>
         </div>
       </div>
     </div>

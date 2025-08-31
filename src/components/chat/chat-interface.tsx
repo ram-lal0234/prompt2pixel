@@ -170,27 +170,27 @@ export function ChatInterface({
       setError(null);
 
       try {
-        // const response = await fetch("/api/generate-thumbnail", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     prompt: messageContent,
-        //     config: thumbnailConfig, // Include thumbnail configuration
-        //     imageData:
-        //       images.length > 0 && images[0].url
-        //         ? await convertImageToBase64(images[0].url)
-        //         : undefined,
-        //     imageMimeType: images.length > 0 ? images[0].type : undefined,
-        //   }),
-        // });
+        const response = await fetch("/api/generate-thumbnail", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: messageContent,
+            config: thumbnailConfig, // Include thumbnail configuration
+            imageData:
+              images.length > 0 && images[0].url
+                ? await convertImageToBase64(images[0].url)
+                : undefined,
+            imageMimeType: images.length > 0 ? images[0].type : undefined,
+          }),
+        });
 
-        const result = staticRes;
+        const result = await response.json();
 
-        // if (!response.ok) {
-        //   throw new Error(result.error || "Failed to get response");
-        // }
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to get response");
+        }
 
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -203,6 +203,15 @@ export function ChatInterface({
         };
 
         setMessages((prev) => [...prev, aiMessage]);
+        
+        // Clear the video title and default image after successful generation
+        console.log("Clearing thumbnail config after successful generation");
+        setThumbnailConfig(prev => ({
+          ...prev,
+          videoTitle: '',
+          defaultImage: '',
+          defaultImagePreview: ''
+        }));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to get response");
       } finally {
@@ -216,6 +225,16 @@ export function ChatInterface({
     setInput("");
     setAttachedFiles([]);
     setError(null);
+    // Reset thumbnail config to defaults
+    setThumbnailConfig({
+      videoTitle: '',
+      primaryColor: '#DC2626',
+      secondaryColor: '#2563EB',
+      defaultImage: '',
+      defaultImagePreview: '',
+      niche: 'education',
+      size: '16:9',
+    });
     onNewChat?.();
   };
 
